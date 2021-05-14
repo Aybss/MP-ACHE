@@ -18,9 +18,9 @@ if qn == "no":
             for filename in files:
                 if filename == "cloud.c":
                     filestriped = filename[:-2]
-                    os.system(f"mpirun -np 2 {filename}")
+                    os.system(f"mpicc {filename}")
                 filestriped = filename[:-2]
-                os.system(f"mpirun -np 2 {filename}")
+                os.system(f"mpicc {filename}")
 
                 print(f"\nCompiling {filename}")
 
@@ -38,9 +38,9 @@ if qn == "no":
         for filename in files:
             if filename == "cloud.c":
                 filestriped = filename[:-2]
-                os.system(f"mpirun -np 2 {filename}")
+                os.system(f"mpicc {filename}")
             filestriped = filename[:-2]
-            os.system(f"mpirun -np 2 {filename}")
+            os.system(f"mpicc {filename}")
 
             print(f"\nCompiling {filename}")
 
@@ -61,9 +61,9 @@ elif qn == "yes":
     for filename in files:
         if filename == "cloud.c":
             filestriped = filename[:-2]
-            os.system(f"mpirun -np 2 {filename}")
+            os.system(f"mpicc {filename}")
         filestriped = filename[:-2]
-        os.system(f"mpirun -np 2 {filename}")
+        os.system(f"mpicc {filename}")
 
         print(f"\nCompiling {filename}")
 
