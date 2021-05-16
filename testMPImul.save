@@ -1,0 +1,13 @@
+#!/bin/bash
+
+g++ -o Multi_alice Multi_alice.c -ltfhe-spqlios-avx -std=c++11
+mpicxx MPI_Multiworking.c -o MPI_Multiworking -ltfhe-spqlios-avx -std=c++11
+#g++ -o MPI_Multi MPI_Multi.c  -ltfhe-spqlios-fma -std=c++11
+g++ -o MPI_verifworking MPI_verifworking.c -ltfhe-spqlios-avx -std=c++11
+
+chmod 777 Multi_alice
+chmod 777
+
+./Multi_alice
+mpirun --hostfile hostfile -np 32 ./MPI_Multiworking
+./MPI_verifworking

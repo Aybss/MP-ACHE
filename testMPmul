@@ -1,0 +1,13 @@
+#!/bin/bash
+
+g++ -o Multi_alice Multi_alice.c -ltfhe-spqlios-avx -std=c++11
+g++  -o MP_cloudworking MP_cloudworking.c -fopenmp -ltfhe-spqlios-avx -std=c++11
+g++ -o Multi_verif Multi_verif.c -ltfhe-spqlios-avx -std=c++11
+
+chmod 777 Multi_alice
+chmod 777 MP_cloudworking
+chmod 777 Multi_verif
+
+./Multi_alice
+./MP_cloudworking
+./Multi_verif
