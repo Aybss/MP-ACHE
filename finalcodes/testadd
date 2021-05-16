@@ -1,0 +1,13 @@
+#!/bin/bash
+
+g++ -o Adder_alice Adder_alice.c -ltfhe-spqlios-avx -std=c++11
+g++ -o Adder_cloud Adder_cloud.c -fopenmp -ltfhe-spqlios-avx -std=c++11
+g++ -o Adder_verif Adder_verif.c -ltfhe-spqlios-avx -std=c++11
+
+chmod 755 Adder_alice
+chmod 755 Adder_cloud
+chmod 755 Adder_verif
+
+./Adder_alice
+./Adder_cloud
+./Adder_verif
