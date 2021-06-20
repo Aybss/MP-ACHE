@@ -19,4 +19,4 @@ Installations and dependecies guide can be seen on our senior's github.
 
 Link to the previous seniors' GitHub (OpenMP): <a href="https://github.com/kennethsoh/IE-ACHE">link</a>.
 
-Link to the previous senior's Google Drive (MPI): <a href="https://drive.google.com/drive/u/1/folders/1iqAVoodlJZNXUzVCGpJPslu6uqvkhILN">link</a>.
+Link to the previous seniors' Google Drive (MPI): <a href="https://drive.google.com/drive/u/1/folders/1iqAVoodlJZNXUzVCGpJPslu6uqvkhILN">link</a>.
