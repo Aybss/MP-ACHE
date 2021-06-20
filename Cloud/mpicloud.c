@@ -19,7 +19,6 @@ ifstream read;
 #define SIZE 1024
 #define T_FILE "averageMPI.txt"
 
-//FOR MPI ADD -> add_full & cleanup
 void add_addition(LweSample *sum, LweSample *carryover, const LweSample *x, const LweSample *y, const LweSample *c, const int32_t nb_bits, const TFheGateBootstrappingCloudKeySet *keyset)
 {
     const LweParams *in_out_params = keyset->params->in_out_params;
@@ -78,7 +77,6 @@ void cleanup(LweSample *result, const int32_t nb_bits, TFheGateBootstrappingClou
     }
 }
 
-//FOR MPI Multi -> MPImul, mul, dieDrama and leftshift
 void MPImul(LweSample *result, LweSample *x, LweSample *y, const LweSample *c, const int32_t nb_bits, int rank, const TFheGateBootstrappingCloudKeySet *keyset)
 {
     const LweParams *in_out_params = keyset->params->in_out_params;
@@ -174,7 +172,6 @@ void NOT(LweSample *result, const LweSample *x, const TFheGateBootstrappingCloud
 
 int main(int argc, char **argv)
 {
-    // Get Operation Code from File
     char test[SIZE];
     FILE *f = fopen("operator.txt", "r");
     fgets(test, SIZE, f);
@@ -185,18 +182,14 @@ int main(int argc, char **argv)
     TFheGateBootstrappingCloudKeySet *bk = new_tfheGateBootstrappingCloudKeySet_fromFile(cloud_key);
     fclose(cloud_key);
 
-    // reads the nbit key from file
     FILE *nbit_key = fopen("nbit.key", "rb");
     TFheGateBootstrappingSecretKeySet *nbitkey = new_tfheGateBootstrappingSecretKeySet_fromFile(nbit_key);
     fclose(nbit_key);
 
-    // if necessary, the params are inside the key
     const TFheGateBootstrappingParameterSet *params = bk->params;
 
-    // if necessary, the params are inside the key
     const TFheGateBootstrappingParameterSet *nbitparams = nbitkey->params;
 
-    // Create ciphertext blocks for negative1, bit1, negative2, bit2 and values
     LweSample *ciphertextbit = new_gate_bootstrapping_ciphertext_array(32, nbitparams);
 
     LweSample *ciphertextnegative1 = new_gate_bootstrapping_ciphertext_array(32, nbitparams);
@@ -227,14 +220,12 @@ int main(int argc, char **argv)
 
     printf("Reading input 1...\n");
 
-    // reads ciphertexts from cloud.data
     FILE *cloud_data = fopen("cloud.data", "rb");
-    for (int i = 0; i < 32; i++) // line0
+    for (int i = 0; i < 32; i++) // 
         import_gate_bootstrapping_ciphertext_fromFile(cloud_data, &ciphertextnegative1[i], nbitparams);
-    for (int i = 0; i < 32; i++) // line1
+    for (int i = 0; i < 32; i++) // 
         import_gate_bootstrapping_ciphertext_fromFile(cloud_data, &ciphertextbit1[i], nbitparams);
 
-    // Decrypts bit size1
     int32_t int_bit1 = 0;
     for (int i = 0; i < 32; i++)
     {
@@ -259,17 +250,16 @@ int main(int argc, char **argv)
     for (int i = 0; i < 32; i++)
         import_gate_bootstrapping_ciphertext_fromFile(cloud_data, &ciphertext8[i], params);
 
-    for (int i = 0; i < 32; i++) // line10
+    for (int i = 0; i < 32; i++) // 
         import_gate_bootstrapping_ciphertext_fromFile(cloud_data, &ciphertextcarry1[i], params);
 
     printf("Reading input 2...\n");
 
-    for (int i = 0; i < 32; i++) // line11
+    for (int i = 0; i < 32; i++) // 
         import_gate_bootstrapping_ciphertext_fromFile(cloud_data, &ciphertextnegative2[i], nbitparams);
-    for (int i = 0; i < 32; i++) // line12
+    for (int i = 0; i < 32; i++) // 
         import_gate_bootstrapping_ciphertext_fromFile(cloud_data, &ciphertextbit2[i], nbitparams);
 
-    // Decrypts bit size2
     int32_t int_bit2 = 0;
     for (int i = 0; i < 32; i++)
     {
@@ -299,12 +289,9 @@ int main(int argc, char **argv)
 
     printf("Reading operation code...\n");
 
-    // Homomorphic encryption to add negative1 and negative2 ciphertexts
     LweSample *ciphertextnegative = new_gate_bootstrapping_ciphertext_array(32, nbitparams);
     LweSample *carry1 = new_gate_bootstrapping_ciphertext_array(32, params);
-    // add(ciphertextnegative, carry1, ciphertextnegative1, ciphertextnegative2, ciphertextcarry1, 32, nbitcloudkey); // NOTE
 
-    // Decrypts Negative1
     int32_t int_negative1 = 0;
     for (int i = 0; i < 32; i++)
     {
@@ -314,7 +301,6 @@ int main(int argc, char **argv)
     std::cout << int_negative1 << " => negative1"
               << "\n";
 
-    // convert first value negativity code from 2 to 1
     if (int_negative1 == 2)
     {
         int_negative1 = 1;
@@ -329,20 +315,11 @@ int main(int argc, char **argv)
     }
     std::cout << int_negative2 << " => negative2"
               << "\n";
-
-    // Add Negatives.
-    // If both v1 & v2 are positive, int_negative = 0
-    // If only v1 is negative, int_negative = 1
-    // If only v2 is negative, int_negative = 2
-    // If both v1 & v2 are negative, int_negative = 3
     int32_t int_negative;
     int_negative = (int_negative1 + int_negative2);
-    // std::cout << int_negative << " -> negatives" << "\n";
 
-    //export the negative and bit data for the verif
     FILE *answer_data = fopen("answer.data", "wb");
 
-    // Write negative to  answer.data
     int32_t ciphernegative = 0;
     if (int_negative == 1)
     {
@@ -371,7 +348,6 @@ int main(int argc, char **argv)
     read.open("operator.txt");
     read >> int_op;
 
-    // Compare bit sizes
     int32_t int_bit = 0;
     if (int_op == 4)
     {
@@ -419,7 +395,6 @@ int main(int argc, char **argv)
 
     fclose(cloud_data);
 
-    //MPI Addition
     printf("MPICloud.c is being computed [mpicloud.c]\n");
     if ((int_op == 1 && (int_negative != 1 && int_negative != 2)) || (int_op == 2 && (int_negative == 1 || int_negative == 2)))
     {
@@ -445,11 +420,9 @@ int main(int argc, char **argv)
             int world_size;
             MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-            //MPI test
 
             printf("Hello World from process %d of %d\n", world_rank, world_size);
 
-            // Ciphertext to hold the result and carry
             LweSample *result = new_gate_bootstrapping_ciphertext_array(32, params);
             LweSample *carry1 = new_gate_bootstrapping_ciphertext_array(32, params);
 
@@ -459,16 +432,13 @@ int main(int argc, char **argv)
 
             printf("Doing the homomorphic computation...\n");
 
-            //Adding component
             add_addition(result, carry1, ciphertext1, ciphertext9, ciphertextcarry1, 32, bk);
 
-            // Timings
             gettimeofday(&end, NULL);
             get_time = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) * 1.0E-6;
             printf("Computation Time: %lf[sec]\n", get_time);
 
-            // export the result ciphertexts to a file (for the cloud)
-            for (int i = 0; i < 32; i++) // result1
+            for (int i = 0; i < 32; i++) // 
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &result[i], params);
             for (int i = 0; i < 32; i++) // 2
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &ciphertextcarry1[i], params);
@@ -490,7 +460,6 @@ int main(int argc, char **argv)
 
             printf("writing the answer to file...\n");
 
-            //Clean up
 
             printf("writing the answer to file...for %d, Calculating\n", world_rank);
 
@@ -534,12 +503,10 @@ int main(int argc, char **argv)
             int world_size;
             MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-            //MPI test
 
             printf("Hello World from process %d of %d\n", world_rank, world_size);
             MPI_Barrier(MPI_COMM_WORLD);
 
-            // Ciphertext to hold the result and carry
             LweSample *result = new_gate_bootstrapping_ciphertext_array(32, params);
             LweSample *result2 = new_gate_bootstrapping_ciphertext_array(32, params);
             LweSample *result3 = new_gate_bootstrapping_ciphertext_array(32, params);
@@ -560,17 +527,11 @@ int main(int argc, char **argv)
 
             printf("Doing the homomorphic computation (64bit Addition)...\n");
 
-            //making carry = 0
             zero(temp1, bk, 32);
 
-            //making carry = 1
-            //zero(temp2, bk, 32);
             bootsCONSTANT(temp2, 1, bk);
 
-            //first 32 bit addition
             add_addition(result, carry1, ciphertext1, ciphertext9, ciphertextcarry1, 32, bk);
-            //add_addition(result2, carry2, ciphertext2, ciphertext10, carry1, 32, bk);
-
             MPI_Barrier(MPI_COMM_WORLD);
 
             //carry = 0
@@ -870,7 +831,6 @@ int main(int argc, char **argv)
                 cleanup(result4, 32, bk);
                 cleanup(carry4, 32, bk);
             }
-            //carry = 1 result5
             if (world_rank == 3)
             {
                 printf("Rank (i=3) %d\n", world_rank);
@@ -898,7 +858,6 @@ int main(int argc, char **argv)
                 cleanup(carry5, 32, bk);
             }
 
-            //carry = 0 result6
             if (world_rank == 4)
             {
                 printf("Rank (i=4) %d\n", world_rank);
@@ -1048,26 +1007,25 @@ int main(int argc, char **argv)
                 import_gate_bootstrapping_ciphertext_fromFile(ansImportCarry7, &anstextImportCarry7[i], params);
             fclose(ansImportCarry7);
 
-            // export the result ciphertexts to a file (for the cloud)
-            for (int i = 0; i < 32; i++) // result1 behind
+            for (int i = 0; i < 32; i++) //  behind
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &result[i], params);
-            for (int i = 0; i < 32; i++) // result1 behind
+            for (int i = 0; i < 32; i++) //  behind
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &carry1[i], params);
-            for (int i = 0; i < 32; i++) // result1 infront
+            for (int i = 0; i < 32; i++) //  infront
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstextImportCarry2[i], params);
             for (int i = 0; i < 32; i++) // result1 infront
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstextImportCarry3[i], params);
-            for (int i = 0; i < 32; i++) // result1 infront
+            for (int i = 0; i < 32; i++) //  infront
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstextImportCarry4[i], params);
-            for (int i = 0; i < 32; i++) // result1 infron
+            for (int i = 0; i < 32; i++) //  infron
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstextImportCarry5[i], params);
             for (int i = 0; i < 32; i++) // result1 infront
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstextImportCarry6[i], params);
-            for (int i = 0; i < 32; i++) // result1 infront
+            for (int i = 0; i < 32; i++) //  infront
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstextImportCarry7[i], params);
-            for (int i = 0; i < 32; i++) // result2 binary2
+            for (int i = 0; i < 32; i++) //  binary2
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstext1[i], params);
-            for (int i = 0; i < 32; i++) // result3 binary3
+            for (int i = 0; i < 32; i++) //  binary3
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstext2[i], params);
             for (int i = 0; i < 32; i++) // 5
                 export_gate_bootstrapping_ciphertext_toFile(answer_data, &anstext3[i], params);
@@ -1191,26 +1149,20 @@ int main(int argc, char **argv)
 
                 gettimeofday(&start, NULL);
 
-                //Subtraction Process
 
-                //Step 1. Inverse the 32 bit chunks in the second input value
                 NOT(inverse1, ciphertext9, bk, 32);
 
-                //iniailize tempcarry and temp carry to 0
                 zero(temp, bk, 32);
                 zero(tempcarry1, bk, 32);
 
-                //Assign temp to have a value of 1 for 2nd complement
                 bootsCONSTANT(temp, 1, bk);
 
-                //Add 1 to inverted
                 add_addition(twosresult1, twoscarry1, inverse1, temp, tempcarry1, 32, bk);
 
                 LweSample *result1 = new_gate_bootstrapping_ciphertext_array(32, params);
 
                 LweSample *carry1 = new_gate_bootstrapping_ciphertext_array(32, params);
 
-                //Do the addition, this is basically adding the first value to the inversed value of the second value, a + (-b)
                 add_addition(result1, carry1, ciphertext1, twosresult1, ciphertextcarry1, 32, bk);
 
                 gettimeofday(&end, NULL);
@@ -1220,7 +1172,6 @@ int main(int argc, char **argv)
 
                 printf("writing the answer to file...\n");
 
-                //export the 32 ciphertexts to a file (for the cloud)
                 for (int i = 0; i < 32; i++) //result1
                     export_gate_bootstrapping_ciphertext_toFile(answer_data, &result1[i], params);
                 for (int i = 0; i < 32; i++) // 2
@@ -1295,23 +1246,17 @@ int main(int argc, char **argv)
                 double get_time;
                 gettimeofday(&start, NULL);
 
-                //Subtraction Process
-
-                //Step 1. Inverse the 32 bit chunks in the second input value
+   
                 NOT(inverse1, ciphertext9, bk, 32);
                 NOT(inverse2, ciphertext10, bk, 32);
 
-                //iniailize tempcarry and temp carry to 0
                 zero(temp, bk, 32);
 
                 zero(tempcarry1, bk, 32);
                 zero(tempcarry2, bk, 32);
 
-                //Assign temp to have a value of 1 for 2nd complement
                 bootsCONSTANT(temp, 1, bk);
 
-                //Add 1 to inverted
-                //9
                 add_addition(twosresult1, twoscarry1, inverse1, temp, tempcarry1, 32, bk);
 
                 //10
@@ -1325,10 +1270,7 @@ int main(int argc, char **argv)
                 LweSample *carry1 = new_gate_bootstrapping_ciphertext_array(32, params);
                 LweSample *carry2 = new_gate_bootstrapping_ciphertext_array(32, params);
 
-                /*add_addition(result1, carry1, ciphertext1, twosresult1, ciphertextcarry1, 32, bk);
-            add_addition(result2, carry2, ciphertext2, twosresult2, carry1, 32, bk);*/
-
-                //Sub
+  
                 add_addition(result1, carry1, ciphertext1, twosresult1, ciphertextcarry1, 32, bk);
 
                 LweSample *makeitzero = new_gate_bootstrapping_ciphertext_array(32, params);
@@ -1342,7 +1284,6 @@ int main(int argc, char **argv)
 
                 MPI_Barrier(MPI_COMM_WORLD);
 
-                //carry = 0
                 if (world_rank == 0)
                 {
                     printf("Rank (i=0) %d\n", world_rank);
@@ -1544,27 +1485,22 @@ int main(int argc, char **argv)
                 NOT(inverse3, ciphertext11, bk, 32);
                 NOT(inverse4, ciphertext12, bk, 32);
 
-                //iniailize tempcarry and temp carry to 0
                 zero(tempStart, bk, 32);
                 zero(tempcarry1, bk, 32);
                 zero(tempcarry2, bk, 32);
                 zero(tempcarry3, bk, 32);
                 zero(tempcarry4, bk, 32);
 
-                //Assign temp to have a value of 1 for 2nd complement
                 bootsCONSTANT(tempStart, 1, bk);
 
-                //Add 1 to inverted
                 add_addition(twosresult1, twoscarry1, inverse1, tempStart, tempcarry1, 32, bk);
 
-                //Add the rest of the inverted
                 add_addition(twosresult2, twoscarry2, inverse2, tempcarry2, twoscarry1, 32, bk);
                 add_addition(twosresult3, twoscarry3, inverse3, tempcarry3, twoscarry2, 32, bk);
                 add_addition(twosresult4, twoscarry4, inverse4, tempcarry4, twoscarry3, 32, bk);
 
                 ////////////////////////////////////
 
-                //making carry = 0
                 zero(temp1, bk, 32);
                 zero(temp3, bk, 32);
                 zero(temp5, bk, 32);
@@ -1579,13 +1515,8 @@ int main(int argc, char **argv)
 
                 MPI_Barrier(MPI_COMM_WORLD);
 
-                ///////////////////////////////////////////
-                /// World rank 0 and 1 -> bit 33 to 64  ///
-                /// World rank 2 and 3 -> bit 65 to 96  ///
-                /// World rank 4 and 5 -> bit 97 to 128 ///
-                ///////////////////////////////////////////
 
-                //carry = 0 result2
+
                 if (world_rank == 0)
                 {
                     printf("Rank (i=0) %d\n", world_rank);
@@ -1612,7 +1543,6 @@ int main(int argc, char **argv)
                     cleanup(result2, 32, bk);
                     cleanup(carry2, 32, bk);
                 }
-                //carry == 1 result3
                 if (world_rank == 1)
                 {
                     printf("Rank (i=1) %d\n", world_rank);
@@ -1640,7 +1570,6 @@ int main(int argc, char **argv)
                     cleanup(carry3, 32, bk);
                 }
 
-                //carry = 0 result4
                 if (world_rank == 2)
                 {
                     printf("Rank (i=2) %d\n", world_rank);
@@ -1695,7 +1624,6 @@ int main(int argc, char **argv)
                     cleanup(carry5, 32, bk);
                 }
 
-                //carry = 0 result6
                 if (world_rank == 4)
                 {
                     printf("Rank (i=4) %d\n", world_rank);
@@ -1798,9 +1726,7 @@ int main(int argc, char **argv)
                     import_gate_bootstrapping_ciphertext_fromFile(ans6, &anstext6[i], params);
                 fclose(ans6);
 
-                ////////////////////////////////////////////////
-                //Carry////////////////////////////////////////
-                //////////////////////////////////////////////
+     
 
                 std::string nameImportCarry2 = "carry2sub.data";
                 char const *fileparamImportCarry2 = nameImportCarry2.c_str();
@@ -1881,7 +1807,6 @@ int main(int argc, char **argv)
 
                 printf("writing the answer to file...\n");
 
-                //Clean up
 
                 printf("writing the answer to file...for %d, Calculating\n", world_rank);
                 MPI_Barrier(MPI_COMM_WORLD);
@@ -2006,26 +1931,20 @@ int main(int argc, char **argv)
 
                 gettimeofday(&start, NULL);
 
-                //Subtraction Process
-
-                //Step 1. Inverse the 32 bit chunks in the second input value
                 NOT(inverse1, ciphertext1, bk, 32);
 
-                //iniailize tempcarry and temp carry to 0
+
                 zero(temp, bk, 32);
                 zero(tempcarry1, bk, 32);
 
-                //Assign temp to have a value of 1 for 2nd complement
                 bootsCONSTANT(temp, 1, bk);
 
-                //Add 1 to inverted
                 add_addition(twosresult1, twoscarry1, inverse1, temp, tempcarry1, 32, bk);
 
                 LweSample *result1 = new_gate_bootstrapping_ciphertext_array(32, params);
 
                 LweSample *carry1 = new_gate_bootstrapping_ciphertext_array(32, params);
 
-                //Do the addition, this is basically adding the first value to the inversed value of the second value, a + (-b)
                 add_addition(result1, carry1, ciphertext9, twosresult1, ciphertextcarry1, 32, bk);
 
                 gettimeofday(&end, NULL);
@@ -2035,7 +1954,6 @@ int main(int argc, char **argv)
 
                 printf("writing the answer to file...\n");
 
-                //export the 32 ciphertexts to a file (for the cloud)
                 for (int i = 0; i < 32; i++) //result1
                     export_gate_bootstrapping_ciphertext_toFile(answer_data, &result1[i], params);
                 for (int i = 0; i < 32; i++) // 2
@@ -2110,29 +2028,22 @@ int main(int argc, char **argv)
                 double get_time;
                 gettimeofday(&start, NULL);
 
-                //Subtraction Process
 
-                //Step 1. Inverse the 32 bit chunks in the second input value
                 NOT(inverse1, ciphertext1, bk, 32);
                 NOT(inverse2, ciphertext2, bk, 32);
 
-                //iniailize tempcarry and temp carry to 0
                 zero(temp, bk, 32);
 
                 zero(tempcarry1, bk, 32);
                 zero(tempcarry2, bk, 32);
 
-                //Assign temp to have a value of 1 for 2nd complement
                 bootsCONSTANT(temp, 1, bk);
 
-                //Add 1 to inverted
-                //9
+   
                 add_addition(twosresult1, twoscarry1, inverse1, temp, tempcarry1, 32, bk);
 
-                //10
                 add_addition(twosresult2, twoscarry2, inverse2, tempcarry2, twoscarry1, 32, bk);
 
-                ///
                 LweSample *result1 = new_gate_bootstrapping_ciphertext_array(32, params);
                 LweSample *result2 = new_gate_bootstrapping_ciphertext_array(32, params);
                 LweSample *result3 = new_gate_bootstrapping_ciphertext_array(32, params);
@@ -2140,10 +2051,7 @@ int main(int argc, char **argv)
                 LweSample *carry1 = new_gate_bootstrapping_ciphertext_array(32, params);
                 LweSample *carry2 = new_gate_bootstrapping_ciphertext_array(32, params);
 
-                /*add_addition(result1, carry1, ciphertext1, twosresult1, ciphertextcarry1, 32, bk);
-            add_addition(result2, carry2, ciphertext2, twosresult2, carry1, 32, bk);*/
 
-                //Sub
                 add_addition(result1, carry1, ciphertext9, twosresult1, ciphertextcarry1, 32, bk);
 
                 LweSample *makeitzero = new_gate_bootstrapping_ciphertext_array(32, params);
@@ -2157,7 +2065,6 @@ int main(int argc, char **argv)
 
                 MPI_Barrier(MPI_COMM_WORLD);
 
-                //carry = 0
                 if (world_rank == 0)
                 {
                     printf("Rank (i=0) %d\n", world_rank);
@@ -2284,12 +2191,10 @@ int main(int argc, char **argv)
                 int world_size;
                 MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-                //MPI test
 
                 printf("Hello World from process %d of %d\n", world_rank, world_size);
                 MPI_Barrier(MPI_COMM_WORLD);
 
-                // Ciphertext to hold the result and carry
                 LweSample *result = new_gate_bootstrapping_ciphertext_array(32, params);
                 LweSample *result2 = new_gate_bootstrapping_ciphertext_array(32, params);
                 LweSample *result3 = new_gate_bootstrapping_ciphertext_array(32, params);
@@ -2367,40 +2272,28 @@ int main(int argc, char **argv)
                 zero(tempcarry3, bk, 32);
                 zero(tempcarry4, bk, 32);
 
-                //Assign temp to have a value of 1 for 2nd complement
                 bootsCONSTANT(tempStart, 1, bk);
 
-                //Add 1 to inverted
                 add_addition(twosresult1, twoscarry1, inverse1, tempStart, tempcarry1, 32, bk);
 
-                //Add the rest of the inverted
                 add_addition(twosresult2, twoscarry2, inverse2, tempcarry2, twoscarry1, 32, bk);
                 add_addition(twosresult3, twoscarry3, inverse3, tempcarry3, twoscarry2, 32, bk);
                 add_addition(twosresult4, twoscarry4, inverse4, tempcarry4, twoscarry3, 32, bk);
 
-                ////////////////////////////////////
 
-                //making carry = 0
                 zero(temp1, bk, 32);
                 zero(temp3, bk, 32);
                 zero(temp5, bk, 32);
 
-                //making carry = 1
                 bootsCONSTANT(temp2, 1, bk);
                 bootsCONSTANT(temp4, 1, bk);
                 bootsCONSTANT(temp6, 1, bk);
 
-                //first 32 bit addition
                 add_addition(result, carry1, ciphertext9, twosresult1, ciphertextcarry1, 32, bk);
 
                 MPI_Barrier(MPI_COMM_WORLD);
 
-                ///////////////////////////////////////////
-                /// World rank 0 and 1 -> bit 33 to 64  ///
-                /// World rank 2 and 3 -> bit 65 to 96  ///
-                /// World rank 4 and 5 -> bit 97 to 128 ///
-                ///////////////////////////////////////////
-
+        
                 //carry = 0 result2
                 if (world_rank == 0)
                 {
@@ -2786,7 +2679,6 @@ int main(int argc, char **argv)
         }
     }
 
-    //MPI Multi
     else if (x == 4)
     {
         MPI_Init(&argc, &argv);
@@ -2795,7 +2687,6 @@ int main(int argc, char **argv)
         int world_size;
         MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-        //MPI test
         printf("Hello World from process %d of %d\n", world_rank, world_size);
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -2816,7 +2707,6 @@ int main(int argc, char **argv)
 
         printf("writing the answer to file...for %d, Calculating\n", world_rank);
 
-        //Dynamically create files to write output from AND
         std::string r = "r";
         std::string s = std::to_string(world_rank);
         s = r + s;
@@ -3073,11 +2963,9 @@ int main(int argc, char **argv)
             fclose(t_file);
         }
 
-        //clean up all pointers
         delete_gate_bootstrapping_ciphertext_array(32, result);
         delete_gate_bootstrapping_ciphertext_array(32, ciphertext9);
         delete_gate_bootstrapping_ciphertext_array(32, ciphertext1);
-        //delete_gate_bootstrapping_ciphertext_array(32, ciphertext3);
         delete_gate_bootstrapping_ciphertext_array(32, anstext1);
         delete_gate_bootstrapping_ciphertext_array(32, anstext2);
         delete_gate_bootstrapping_ciphertext_array(32, result1);
