@@ -8,7 +8,7 @@ Possible Future Implementations
 ===============================
 
 - 256 bit computations (MPI) 
-- > 64 bit Multiplication (MPI)
+- 64 bit and over Multiplication (MPI)
 - Implementation of GUI
 (More details in issues)
 
