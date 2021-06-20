@@ -17,6 +17,16 @@ Dependencies
 
 Installations and dependecies guide can be seen on our senior's github.
 
+When cloning
+```
+$ cd /
+$ git clone https://github.com/Aybss/MP-ACHE.git
+$ cd MP-ACHE
+
+# Provide executable permissions if needed
+$ chmod u+x */*
+```
+
 Link to the previous seniors' GitHub (OpenMP): <a href="https://github.com/kennethsoh/IE-ACHE">link</a>.
 
 Link to the previous seniors' Google Drive (MPI): <a href="https://drive.google.com/drive/u/1/folders/1iqAVoodlJZNXUzVCGpJPslu6uqvkhILN">link</a>.
