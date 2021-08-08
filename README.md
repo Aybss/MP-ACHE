@@ -25,5 +25,6 @@ $ cd MP-ACHE
 $ chmod u+x */*
 ```
 
-<a href="https://github.com/kennethsoh/IE-ACHE">Click here to go to seniors' GitHub (OpenMP):</a>
-<a href="https://drive.google.com/drive/u/1/folders/1iqAVoodlJZNXUzVCGpJPslu6uqvkhILN">Click here to go to seniors' Google Drive (MPI): </a>.
+<a href="https://github.com/kennethsoh/IE-ACHE">Click here to go to seniors' GitHub (OpenMP)</a>
+<br>
+<a href="https://drive.google.com/drive/u/1/folders/1iqAVoodlJZNXUzVCGpJPslu6uqvkhILN">Click here to go to seniors' Google Drive (MPI)</a>
